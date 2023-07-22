@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Tango</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(120deg, #FFCDB2, #FF6589);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #FF6589;
+            text-align: center;
+        }
+
+        .todo-container {
+            background-color: #FFF;
+            padding: 20px;
+            padding-right: 40px;
+            border-radius: 8px;
+            width: 700px;
+            max-width: 90%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #FF6589;
+            color: #FFF;
+            border: none;
+            padding: 10px 15px;
+            margin-right: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #FF2D5D;
+        }
+
+        #taskList {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #FF6589;
+            color: #FFF;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #ccc;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+        
+        #taskListContainer {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="todo-container">
+        <h1>Task Tango !!</h1>
+
+        <div>
+            <label for="task">Task:</label>
+            <input type="text" id="task" placeholder="Enter task">
+        </div>
+
+        <div>
+            <label for="dueTime">Due Time:</label>
+            <input type="text" id="dueTime" placeholder="Enter time (HH:MM AM/PM)">
+        </div>
+
+        <div>
+            <button onclick="addTask()">Add Task</button>
+            <button onclick="deleteAll()">Delete All</button>
+        </div>
+
+        <!-- Updated ID for task display box container -->
+        <div id="taskListContainer">
+            <h2>Tasks:</h2>
+            <table id="taskList">
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Due Date</th>
+                        <th>Due Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Tasks will be displayed here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+
+        const tasksArray = [];
+
+        var currentDate = new Date();
+        var options = { year: 'numeric', month: 'long', day: 'numeric' };
+        var formattedDate = currentDate.toLocaleDateString('en-US', options);
+
+        document.getElementById('currentDate').textContent = formattedDate;
+
+        function addTask() {
+            const task = document.getElementById("task").value;
+            const dueDate = formattedDate;
+            const dueTime = document.getElementById("dueTime").value;
+
+
+            tasksArray.push({
+                task: task,
+                dueDate: dueDate,
+                dueTime: dueTime
+            });
+
+            updateTaskTable(); 
+        }
+
+        function getTasksFromLocalStorage() {
+            const tasksData = localStorage.getItem("tasks");
+            if (tasksData) {
+                tasksArray = JSON.parse(tasksData);
+                updateTaskTable();
+            }
+        }
+
+        function saveTasksToLocalStorage() {
+            localStorage.setItem("tasks", JSON.stringify(tasksArray));
+        }
+
+        
+
+        function deleteAll() {
+            tasksArray.length = 0; 
+            updateTaskTable(); 
+        }
+
+        function updateTaskTable() {
+            const taskTableBody = document.getElementById("taskList").getElementsByTagName("tbody")[0];
+            taskTableBody.innerHTML = ""; 
+
+
+            tasksArray.forEach((taskData, index) => {
+                const row = document.createElement("tr");
+                const taskCell = document.createElement("td");
+                const dueDateCell = document.createElement("td");
+                const dueTimeCell = document.createElement("td");
+                const actionsCell = document.createElement("td");
+
+                taskCell.textContent = taskData.task;
+                dueDateCell.textContent = taskData.dueDate;
+                dueTimeCell.textContent = taskData.dueTime;
+
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Completed";
+                deleteButton.onclick = function () {
+                    tasksArray.splice(index, 1);
+                    updateTaskTable(); 
+                };
+
+                actionsCell.appendChild(deleteButton);
+
+                row.appendChild(taskCell);
+                row.appendChild(dueDateCell);
+                row.appendChild(dueTimeCell);
+                row.appendChild(actionsCell);
+
+                taskTableBody.appendChild(row);
+            });
+
+
+            const taskListContainer = document.getElementById("taskListContainer");
+            taskListContainer.style.display = tasksArray.length === 0 ? "none" : "block";
+        }
+    </script>
+</body>
+</html>
